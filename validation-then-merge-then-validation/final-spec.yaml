@@ -1,0 +1,39 @@
+metadata:
+  name: eventbus-source-config
+  labels:
+    app: eventbus-numaflow-poc
+kind: ConfigMap
+apiVersion: v1
+data:
+  configuration: |
+    topicName: eventbus-nf-poc
+    topicNameHeaderKey: "__topic_name"   # use this as key to set the topic name as part of the Headers
+    appSecretKey: asset-api-credentials-prd        # from step 4 in pre-requisite
+    idpsConfig:
+      idpsProperties:
+        policy_id: p-sgkpuawpry2q       # from step 5 in pre-requisite
+        endpoint: vkm-e2e.ps.idps.a.intuit.com
+        force_generic_policies: true
+    eventBusConfig:
+      clusterEnvironment: E2E
+      tmsClientConfig:
+        # replace with your assetid
+        assetId: "1948950332065804001"
+        # replace with your asset alias
+        intuitAppId: Intuit.oss.analytics.eventbusnumaflowpoc
+        environment: PROD  # always connect to prod
+        gatewayAuthContextType: offline_ticket
+        offlineJobId: "9341452005948285"  # from step 3 in pre-requisite
+        identityServiceMeshEnabled: false
+        debugLoggingEnabled: false
+      idpsClientConfig:
+        idpsProperties:
+          policy_id: p-bk67546uhm3g       # from step 6 in pre-requisite
+          endpoint: vkm-e2e.ps.idps.a.intuit.com
+          force_generic_policies: true
+      consumerConfig:
+        kafkaProperties:
+          group.id: eventbus-nf-poc-e2e-1    # very important to set this with unique value
+          auto.offset.reset: latest
+          max.poll.interval.ms: 2
+          max.poll.records: 100
