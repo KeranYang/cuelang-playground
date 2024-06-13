@@ -12,15 +12,6 @@ package main
 
 #Vertex: {
     name: string
-    source?: {}
-    udf?: {
-        builtin?: {
-            name: string
-        }
-    }
-    sink?: {
-        log?: {}
-    }
 }
 
 #Edge: {

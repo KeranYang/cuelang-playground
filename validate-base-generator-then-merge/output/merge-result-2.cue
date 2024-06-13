@@ -1,18 +1,12 @@
-base: {
+userInputBase: {
 	metadata: name: "simple-pipeline"
 	spec: {
 		vertices: [{
 			name: "in"
-			source: {}
 		}, {
 			name: "cat"
-			udf: builtin: name: "cat"
 		}, {
 			name: "out"
-			sink: {
-				// A simple log printing sink
-				log: {}
-			}
 		}]
 		edges: [{
 			from: "in"
@@ -23,16 +17,19 @@ base: {
 		}]
 	}
 }
-vertex: {
+userInputVertices: [{
 	name: "in"
-	source: {
-		// A self data generating source
-		generator: {
-			rpu:      5
-			duration: "1s"
-		}
+	source: generator: {
+		rpu:      5
+		duration: "1s"
 	}
-}
+}, {
+	name: "cat"
+	udf: builtin: name: "cat"
+}, {
+	name: "out"
+	sink: log: {}
+}]
 transformed: {
 	apiVersion: "numaflow.numaproj.io/v1alpha1"
 	kind:       "Pipeline"
@@ -40,14 +37,17 @@ transformed: {
 	spec: {
 		vertices: [{
 			name: "in"
-			source: {
-				// A self data generating source
-				generator: {
-					rpu:      5
-					duration: "1s"
-				}
+			source: generator: {
+				rpu:      5
+				duration: "1s"
 			}
-		}, {}, {}]
+		}, {
+			name: "cat"
+			udf: builtin: name: "cat"
+		}, {
+			name: "out"
+			sink: log: {}
+		}]
 		edges: [{
 			from: "in"
 			to:   "cat"

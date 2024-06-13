@@ -1,12 +1,7 @@
-package main
-
-vertex: {
+spec: vertices: [{
 	name: "in"
-	source: {
-		// A self data generating source
-		generator: {
-			rpu:      5
-			duration: "1s"
-		}
+	source: generator: {
+		rpu:      5
+		duration: "1s"
 	}
-}
+}]
