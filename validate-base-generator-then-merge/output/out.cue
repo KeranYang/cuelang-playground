@@ -1,0 +1,4 @@
+spec: vertices: [{
+	name: "out"
+	sink: log: {}
+}]

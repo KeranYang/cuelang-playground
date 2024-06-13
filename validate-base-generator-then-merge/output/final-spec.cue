@@ -23,3 +23,7 @@ spec: {
 		to:   "out"
 	}]
 }
+
+output: {
+  transformed
+}
