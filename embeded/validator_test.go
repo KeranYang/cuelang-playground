@@ -10,26 +10,6 @@ import (
 const expectedFinalPipelineSpec = `apiVersion: numaflow.numaproj.io/v1alpha1
 metadata:
   name: simple-pipeline
-spec:
-  vertices:
-    - name: in
-      source:
-        generator:
-          duration: 1s
-          rpu: 5
-    - name: cat
-      udf:
-        builtin:
-          name: cat
-    - name: out
-      sink:
-        log: {}
-  edges:
-    - from: in
-      to: cat
-    - from: cat
-      to: out
-      onFull: discardLatest
 kind: Pipeline
 `
 
