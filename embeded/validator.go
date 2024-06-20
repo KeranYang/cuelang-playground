@@ -14,14 +14,13 @@ import (
 
 // Embed all CUE schema files and the cue.mod directory
 //
-//go:embed cue.mod/module.cue
-//go:embed cue.mod/gen/*
+//go:embed cue.mod/*
 //go:embed schemas/*/*/*.cue
-var content embed.FS
+var embeddedFiles embed.FS
 
 func ValidatePipelineSpec(input []byte) bool {
 	ctx := cuecontext.New()
-	schemaInstance := loadInstance(ctx, "schemas/numaflow/v-1-2/pipeline.cue")
+	schemaInstance := loadInstance(ctx, "/schemas/numaflow/v-1-2/pipeline.cue")
 	if err := schemaInstance.Err(); err != nil {
 		fmt.Printf("Error loading schema: %v\n", err)
 		return false
@@ -34,46 +33,16 @@ func ValidatePipelineSpec(input []byte) bool {
 	return true
 }
 
-// Helper to read embedded files
-func readFile(fs embed.FS, path string) []byte {
-	data, err := fs.ReadFile(path)
-	if err != nil {
-		log.Fatalf("failed reading file from path %s: %v", path, err)
-	}
-	return data
-}
-
+// loadInstance loads a CUE instance from a schema file.
 func loadInstance(ctx *cue.Context, schemaPath string) *cue.Value {
-	overlay := make(map[string]load.Source)
-	prefix := "schemas"
+	overlay, _ := setupOverlay()
 
-	// Iterate over embedded schema files and module files
-	err := fs.WalkDir(content, prefix, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
+	/*
+		fmt.Printf("Overlay")
+		for k, v := range overlay {
+			fmt.Printf("Key: %s, Value: %s\n", k, v)
 		}
-		if !d.IsDir() {
-			fileData := readFile(content, path)
-			// fmt.Printf("Loading schema file: %s\n", string(fileData))
-			// fmt.Printf("Loading schema file: %s\n", path)
-			absPath := "/" + path
-			overlay[absPath] = load.FromBytes(fileData)
-		}
-		return nil
-	})
-	if err != nil {
-		log.Fatalf("failed to walk through schemas directory: %v", err)
-	}
-
-	// Overlay must include the module configuration
-	// moduleCueContent := readFile(content, "cue.mod/module.cue")
-	// fmt.Printf("Module cue content: %s\n", string(moduleCueContent))
-	// overlay["/cue.mod/module.cue"] = load.FromBytes(moduleCueContent)
-
-	fmt.Printf("Overlay")
-	for k, v := range overlay {
-		fmt.Printf("Key: %s, Value: %s\n", k, v)
-	}
+	*/
 
 	instConfig := &load.Config{
 		Dir:        "/",
@@ -81,7 +50,7 @@ func loadInstance(ctx *cue.Context, schemaPath string) *cue.Value {
 		Overlay:    overlay,
 	}
 
-	buildInstances := load.Instances([]string{"/" + schemaPath}, instConfig)
+	buildInstances := load.Instances([]string{schemaPath}, instConfig)
 	if len(buildInstances) == 0 || buildInstances[0].Err != nil {
 		log.Printf("Error loading instances: %v\n", buildInstances[0].Err)
 		return nil
@@ -94,6 +63,29 @@ func loadInstance(ctx *cue.Context, schemaPath string) *cue.Value {
 	}
 
 	return &inst
+}
+
+// setupOverlay sets up an overlay for the CUE instances. It walks the embedded files and creates a map of the file paths and their contents.
+func setupOverlay() (map[string]load.Source, error) {
+	overlay := make(map[string]load.Source)
+	err := fs.WalkDir(embeddedFiles, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if !d.IsDir() {
+			data, err := fs.ReadFile(embeddedFiles, path)
+			if err != nil {
+				return err
+			}
+			// The following line ensures all paths in the overlay use '/' and are set up from the root ('/')
+			overlay["/"+path] = load.FromBytes(data)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return overlay, nil
 }
 
 // generateCueValueOfYamlEncoding generates a CUE value from a YAML byte array.
