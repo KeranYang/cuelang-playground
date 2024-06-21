@@ -46,7 +46,7 @@ func loadInstance(ctx *cue.Context, schemaPath string) *cue.Value {
 
 	instConfig := &load.Config{
 		Dir:        "/",
-		ModuleRoot: "/cue.mod",
+		ModuleRoot: "/",
 		Overlay:    overlay,
 	}
 
