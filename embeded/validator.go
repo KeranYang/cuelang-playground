@@ -37,13 +37,6 @@ func ValidatePipelineSpec(input []byte) bool {
 func loadInstance(ctx *cue.Context, schemaPath string) *cue.Value {
 	overlay, _ := setupOverlay()
 
-	/*
-		fmt.Printf("Overlay")
-		for k, v := range overlay {
-			fmt.Printf("Key: %s, Value: %s\n", k, v)
-		}
-	*/
-
 	instConfig := &load.Config{
 		Dir:        "/",
 		ModuleRoot: "/",
